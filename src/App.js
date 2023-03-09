@@ -3,7 +3,6 @@ import React from "react";
 
 function App() {
     return (
-
         <canvas id="canvas" width="276" height="414"/>
     );
 }
