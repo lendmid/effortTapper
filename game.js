@@ -7,24 +7,51 @@ scrn.tabIndex = 1;
 
 const sceneHeight = 500;
 const sceneWidth = 1000;
+const siblingHeight = 100;
+const floorHeight = 600;
+
+let frames = 0;
+let sceneX = 0;
 const pointRadius = 35;
+const pointXCoord = 250;
+const dx = 2;
+const state = {
+  curr: 0,
+  getReady: 0,
+  Play: 1,
+  gameOver: 2,
+};
+const pointColor = "#E7E7E7";
+const bottomColor = "#00000033";
 
 const drawPoint = (x, y) => {
   sctx.beginPath();
   sctx.arc(x, y, pointRadius, 0, 2 * Math.PI);
-  sctx.fillStyle = "#E7E7E7";
+  sctx.fillStyle = pointColor;
   sctx.fill();
   sctx.save();
 };
 
-const drawDashedLine = (height) => {
+const drawLine = (coordsHistory, pointX, pointY) => {
+  sctx.beginPath();
+  sctx.setLineDash([]);
+  sctx.moveTo(pointX, pointY);
+  for (const coord of coordsHistory) {
+    sctx.lineTo(coord.x, coord.y);
+  }
+  sctx.strokeStyle = "black";
+  sctx.stroke();
+  sctx.save();
+};
+
+const drawDashedLine = (y, x) => {
   sctx.beginPath();
   sctx.setLineDash([15, 15]);
-  sctx.moveTo(0, height);
-  sctx.lineTo(1000, height);
-  sctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+  sctx.moveTo(0, y);
+  sctx.lineTo(1000, y);
+  sctx.strokeStyle = bottomColor;
+  sctx.lineDashOffset = -x;
   sctx.stroke();
-
   sctx.save();
 };
 
@@ -45,80 +72,84 @@ scrn.addEventListener("click", () => {
       break;
   }
 });
-
-let frames = 0;
-let dx = 2;
-const state = {
-  curr: 0,
-  getReady: 0,
-  Play: 1,
-  gameOver: 2,
-};
-
 const sibling = {
-  // sprite: new Image(),
-  x: 0,
-  y: 100,
+  y: siblingHeight,
   draw: function () {
-    // sctx.save();
-    drawDashedLine(this.y);
-    // console.log("scrn.height - this.sprite.height: ", scrn.height - this.sprite.height)
-    // this.y = parseFloat(scrn.height - this.sprite.height);
-    // sctx.drawImage(this.sprite, this.x, this.y);
-    // const fixTaxLevel = sceneHeight * 0.3;
-    // sctx.beginPath();
-    // this.y = sceneHeight - fixTaxLevel
-    // sctx.save();
-    // sctx.fillStyle = "#FF000020";
-    // sctx.fillRect(0, sceneHeight - fixTaxLevel, sceneWidth, fixTaxLevel);
-    // sctx.stroke();
+    sctx.save();
+    drawDashedLine(this.y, sceneX);
   },
-  // update: function () {
-  //   if (state.curr !== state.Play) return;
-  //   debugger
-  //   this.x -= dx;
-  //   this.x = this.x % (this.sprite.width / 2);
-  // },
+  update: function () {
+    if (state.curr !== state.Play) return;
+    sceneX -= dx;
+    // console.log("this.x", this.x);
+    // console.log("sceneX", sceneX);
+    if (sceneX + sceneWidth <= 0) sceneX = 0;
+  },
 };
 
 const floor = {
-  // sprite: new Image(),
-  x: 0,
-  y: 600,
+  y: floorHeight,
   draw: function () {
-    drawDashedLine(this.y);
+    drawDashedLine(this.y, sceneX);
+  },
+  update: function () {
+    if (state.curr !== state.Play) return;
   },
 };
 
 const point = {
-  x: 250,
+  x: pointXCoord,
   y: 350,
   speed: 0,
-  gravity: 0.125, //0.05
+  gravity: 0.125,
+  acceleration: 3,
   thrust: 3.6,
   frame: 0,
+  coordsHistory: [],
+  pointXOldCoords: pointXCoord,
   draw: function () {
-    const isFloorIntersection = this.y + pointRadius > floor.y;
-    // sctx.save();
-    drawPoint(this.x, this.y);
-    if (!isFloorIntersection) {
-      this.speed += this.gravity;
+    const bottomOfThePoint = this.y + pointRadius;
+    const floorPointIntersection = bottomOfThePoint > floorHeight;
+    const topOfThePoint = this.y - pointRadius;
+    const sibblingPointIntersection = topOfThePoint < siblingHeight;
+    // const topOfThePoint = this.y - pointRadius;
+    this.speed += this.gravity * this.acceleration;
+    // if (!floorPointIntersection && !sibblingPointIntersection) {
+    if (!floorPointIntersection) {
+      // if (this.y + this.speed > bottomLineHeight) {
+      // this.y = bottomLineHeight;
+      // } else {
+      this.y += this.speed;
+      // }
     }
-    this.y += this.speed;
-    // this.y += this.speed;
-    // sctx.restore();
-    console.log("point: ", this);
-    // let h = this.animations[this.frame].sprite.height;
-    // let w = this.animations[this.frame].sprite.width;
-    // sctx.save();
-    // sctx.translate(this.x, this.y);
-    // sctx.rotate(this.rotatation * RAD);
-    // sctx.drawImage(this.animations[this.frame].sprite, -w / 2, -h / 2);
-    // sctx.restore();
+    // if (topOfThePoint) {
+    // }
+    drawPoint(this.x, this.y);
+    this.pointXOldCoords -= dx;
+
+    if (this.pointXOldCoords + pointXCoord <= 0) this.pointXCoord = 0;
+    if (this.coordsHistory.length < pointXCoord) {
+      this.coordsHistory.push({ x: this.pointXOldCoords, y: this.y });
+    } else {
+      this.coordsHistory = [];
+    }
+
+    drawLine(this.coordsHistory, this.x, this.y);
+
+    // console.log("point: ", this);
+    console.log("this.xCoordsHistory: ", this.coordsHistory);
   },
   flap: function () {
+    const topOfThePoint = this.y - pointRadius;
+    const sibblingPointIntersection = topOfThePoint > siblingHeight;
     if (this.y > 0) {
-      this.speed = -this.thrust;
+      // console.log("sibblingPointIntersection: ", sibblingPointIntersection);
+      if (sibblingPointIntersection) {
+        this.speed = -this.thrust * this.acceleration;
+      } else {
+        this.speed = 0;
+      }
+      this.y += this.speed;
     }
   },
 };
@@ -160,8 +191,9 @@ const UI = {
     this.drawScore();
   },
   drawScore: function () {
-    sctx.fillStyle = "#FFFFFF";
-    sctx.strokeStyle = "#000000";
+    sctx.fillStyle = "white";
+    sctx.strokeStyle = "black";
+    sctx.setLineDash([]);
     switch (state.curr) {
       case state.Play:
         sctx.lineWidth = "2";
@@ -205,16 +237,22 @@ UI.tap[0].sprite.src = "img/tap/t0.png";
 UI.tap[1].sprite.src = "img/tap/t1.png";
 
 function draw() {
-  sctx.fillStyle = "#fff";
+  sctx.fillStyle = "white";
   sctx.fillRect(0, 0, scrn.width, scrn.height);
 
   sibling.draw();
   floor.draw();
   point.draw();
+  // historyLine.draw();
   UI.draw();
 }
-
+function update() {
+  sibling.update();
+  floor.update();
+  UI.update();
+}
 function gameLoop() {
+  update();
   draw();
   frames++;
   // console.log("state: ", state);
