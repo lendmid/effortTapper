@@ -15,6 +15,7 @@ let sceneX = 0;
 const pointRadius = 35;
 const pointXCoord = 250;
 const dx = 2;
+let coordsHistory = [];
 const state = {
   curr: 0,
   getReady: 0,
@@ -32,13 +33,12 @@ const drawPoint = (x, y) => {
   sctx.save();
 };
 
-const drawLine = (coordsHistory, pointX, pointY) => {
+const drawLine = (coordsHistory) => {
   sctx.beginPath();
   sctx.setLineDash([]);
   sctx.lineWidth = 2;
 
-  sctx.moveTo(pointX, pointY);
-  for (const coord of coordsHistory) {
+  for (const coord of coordsHistory.slice((coordsHistory.length - 250, 0))) {
     sctx.lineTo(coord.x, coord.y);
   }
   sctx.strokeStyle = "black";
@@ -101,7 +101,6 @@ const point = {
   thrust: 10,
   // thrust: 3.6,
   frame: 0,
-  coordsHistory: [],
   draw: function () {
     if (state.curr !== state.Play) {
       drawPoint(this.x, this.y);
@@ -128,13 +127,13 @@ const point = {
     }
     drawPoint(this.x, this.y);
 
-    this.coordsHistory = this.coordsHistory.map((coords, i, arr) => {
+    coordsHistory = coordsHistory.map((coords, i, arr) => {
       return { x: coords.x - dx, y: coords.y };
     });
-    this.coordsHistory.push({ x: this.x, y: this.y });
-    
-console.log("this.coordsHistory", this.coordsHistory)
-    drawLine(this.coordsHistory, this.x, this.y);
+    coordsHistory.push({ x: this.x, y: this.y });
+
+    console.log("this.coordsHistory", coordsHistory);
+    drawLine(coordsHistory);
   },
   flap: function () {
     if (this.y < 0) return;
