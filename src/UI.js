@@ -1,5 +1,9 @@
 import {frames, state,} from "./state"
 import {scrn, sctx} from "./game"
+import gameOver from "../img/gameOver.png"
+import tap1 from "../img/tap1.png"
+import tap2 from "../img/tap2.png"
+import getReady from "../img/getReady.png"
 
 const UI = {
     getReady: {sprite: new Image()},
@@ -78,10 +82,10 @@ const UI = {
     },
 };
 
-UI.gameOver.sprite.src = "img/gameOver.png";
-UI.getReady.sprite.src = "img/getReady.png";
-UI.tap[0].sprite.src = "img/tap1.png";
-UI.tap[1].sprite.src = "img/tap2.png";
+UI.gameOver.sprite.src = gameOver;
+UI.getReady.sprite.src = getReady;
+UI.tap[0].sprite.src = tap1;
+UI.tap[1].sprite.src = tap2;
 
 export {
     UI,
