@@ -35,6 +35,8 @@ const drawPoint = (x, y) => {
 const drawLine = (coordsHistory, pointX, pointY) => {
   sctx.beginPath();
   sctx.setLineDash([]);
+  sctx.lineWidth = 2;
+
   sctx.moveTo(pointX, pointY);
   for (const coord of coordsHistory) {
     sctx.lineTo(coord.x, coord.y);
@@ -75,15 +77,10 @@ scrn.addEventListener("click", () => {
 const sibling = {
   y: siblingHeight,
   draw: function () {
-    sctx.save();
     drawDashedLine(this.y, sceneX);
-  },
-  update: function () {
+
     if (state.curr !== state.Play) return;
     sceneX -= dx;
-    // console.log("this.x", this.x);
-    // console.log("sceneX", sceneX);
-    if (sceneX + sceneWidth <= 0) sceneX = 0;
   },
 };
 
@@ -92,65 +89,56 @@ const floor = {
   draw: function () {
     drawDashedLine(this.y, sceneX);
   },
-  update: function () {
-    if (state.curr !== state.Play) return;
-  },
 };
 
 const point = {
   x: pointXCoord,
   y: 350,
   speed: 0,
-  gravity: 0.125,
+  // gravity: 0.125,
+  gravity: 0.5,
   acceleration: 3,
-  thrust: 3.6,
+  thrust: 10,
+  // thrust: 3.6,
   frame: 0,
   coordsHistory: [],
-  pointXOldCoords: pointXCoord,
   draw: function () {
+    if (state.curr !== state.Play) {
+      drawPoint(this.x, this.y);
+      return;
+    }
+
     const bottomOfThePoint = this.y + pointRadius;
     const floorPointIntersection = bottomOfThePoint > floorHeight;
     const topOfThePoint = this.y - pointRadius;
-    const sibblingPointIntersection = topOfThePoint < siblingHeight;
-    // const topOfThePoint = this.y - pointRadius;
-    this.speed += this.gravity * this.acceleration;
-    // if (!floorPointIntersection && !sibblingPointIntersection) {
+
+    this.speed += this.gravity;
+
     if (!floorPointIntersection) {
-      // if (this.y + this.speed > bottomLineHeight) {
-      // this.y = bottomLineHeight;
-      // } else {
-      this.y += this.speed;
-      // }
+      const isNextYLowerThenFloor = bottomOfThePoint + this.speed > floorHeight;
+      const isNextYHigherThenSibbling =
+        topOfThePoint + this.speed < siblingHeight;
+      if (isNextYLowerThenFloor) {
+        this.y = floorHeight - pointRadius;
+      } else if (isNextYHigherThenSibbling) {
+        this.y = siblingHeight + pointRadius;
+      } else {
+        this.y += this.speed;
+      }
     }
-    // if (topOfThePoint) {
-    // }
     drawPoint(this.x, this.y);
-    this.pointXOldCoords -= dx;
 
-    if (this.pointXOldCoords + pointXCoord <= 0) this.pointXCoord = 0;
-    if (this.coordsHistory.length < pointXCoord) {
-      this.coordsHistory.push({ x: this.pointXOldCoords, y: this.y });
-    } else {
-      this.coordsHistory = [];
-    }
-
+    this.coordsHistory = this.coordsHistory.map((coords, i, arr) => {
+      return { x: coords.x - dx, y: coords.y };
+    });
+    this.coordsHistory.push({ x: this.x, y: this.y });
+    
+console.log("this.coordsHistory", this.coordsHistory)
     drawLine(this.coordsHistory, this.x, this.y);
-
-    // console.log("point: ", this);
-    console.log("this.xCoordsHistory: ", this.coordsHistory);
   },
   flap: function () {
-    const topOfThePoint = this.y - pointRadius;
-    const sibblingPointIntersection = topOfThePoint > siblingHeight;
-    if (this.y > 0) {
-      // console.log("sibblingPointIntersection: ", sibblingPointIntersection);
-      if (sibblingPointIntersection) {
-        this.speed = -this.thrust * this.acceleration;
-      } else {
-        this.speed = 0;
-      }
-      this.y += this.speed;
-    }
+    if (this.y < 0) return;
+    this.speed = -this.thrust;
   },
 };
 
@@ -247,8 +235,8 @@ function draw() {
   UI.draw();
 }
 function update() {
-  sibling.update();
-  floor.update();
+  // sibling.update();
+  // floor.update();
   UI.update();
 }
 function gameLoop() {
