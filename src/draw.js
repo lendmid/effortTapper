@@ -1,5 +1,7 @@
 import {scrn, sctx} from "./game"
 import {UI} from "./UI";
+import {bottomColor, pointColor, pointRadius} from "./constst";
+import {floor, point, sibling} from "./items";
 
 const drawPoint = (x, y) => {
     sctx.beginPath();
@@ -14,7 +16,7 @@ const drawLine = (coordsHistory) => {
     sctx.setLineDash([]);
     sctx.lineWidth = 2;
 
-    for (const coord of coordsHistory.slice((coordsHistory.length - 250, 0))) {
+    for (const coord of coordsHistory.slice(coordsHistory.length - 250, 0)) {
         sctx.lineTo(coord.x, coord.y);
     }
     sctx.strokeStyle = "black";
