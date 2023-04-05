@@ -11,13 +11,33 @@ const drawPoint = (x, y) => {
     sctx.save();
 };
 
+let start = {x: 0, y: 0};
+let cp1 = {x: 180, y: 10};
+let cp2 = {x: 100, y: 60};
+let end = {x: 200, y: 80};
+
 const drawLine = (coordsHistory) => {
     sctx.beginPath();
     sctx.setLineDash([]);
     sctx.lineWidth = 2;
 
-    for (const coord of coordsHistory.slice(coordsHistory.length - 250, 0)) {
-        sctx.lineTo(coord.x, coord.y);
+    const last250Coords = coordsHistory.slice(coordsHistory.length - 250, 0)
+    const last2Points = []
+    for (const coords of last250Coords) {
+        const startPoint = last2Points[0]
+        const endPoint = last2Points[1]
+
+        const cp1 = {x: (startPoint.x - endPoint.x) * 0.33, y: (startPoint.y - endPoint.y) * 0.33}
+        const cp2 = {x: (startPoint.x - endPoint.x) * 0.66, y: (startPoint.y - endPoint.y) * 0.66}
+        if (last2Points.length === 1) {
+            sctx.bezierCurveTo(startPoint.x, startPoint.y, endPoint.x, endPoint.y, end.x, end.y);
+            sctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, endPoint.x, endPoint.y);
+
+            // sctx.lineTo(coords.x, coords.y);
+        } else {
+            last2Points.push(coords)
+        }
+
     }
     sctx.strokeStyle = "black";
     sctx.stroke();

@@ -1,6 +1,7 @@
 import {frames, state,} from "./state"
 import {drawScene} from "./draw"
 import {UI} from "./UI"
+import {point} from "./items";
 
 const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
@@ -18,7 +19,6 @@ scrn.addEventListener("click", () => {
             state.curr = state.getReady;
             point.speed = 0;
             point.y = 100;
-            // pipe.pipes = [];
             UI.score.curr = 0;
             break;
     }
