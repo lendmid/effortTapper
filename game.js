@@ -16,6 +16,7 @@ const pointRadius = 35;
 const pointXCoord = 250;
 const dx = 2;
 let coordsHistory = [];
+
 const state = {
   curr: 0,
   getReady: 0,
@@ -33,19 +34,20 @@ const drawPoint = (x, y) => {
   sctx.save();
 };
 
-const drawLine = (coordsHistory, lastX, lastY) => {
-  sctx.beginPath();
+const drawLine = (last200Coords) => {
   sctx.setLineDash([]);
   sctx.lineWidth = 2;
+  sctx.beginPath();
+  if (last200Coords.length < 2) return;
+  for (let i = 0; i < last200Coords.length - 1; i++) {
+    const lastPoint = last200Coords[i];
+    const firstPoint = last200Coords[i + 1];
 
-  // coordsHistory = coordsHistory.map((coords) => {
-  //     return {x: coords.x - dx, y: coords.y};
-  // });
-  // coordsHistory.push();
-
-  console.log("this.coordsHistory", coordsHistory);
-  for (const coord of coordsHistory.slice((coordsHistory.length - 250, 0))) {
-    sctx.lineTo(coord.x, coord.y);
+    const x_mid = (lastPoint.x + firstPoint.x) / 2;
+    const y_mid = (lastPoint.y + firstPoint.y) / 2;
+    const cp_x = (x_mid + lastPoint.x) / 2;
+    const cp_y = (y_mid + lastPoint.y) / 2;
+    sctx.quadraticCurveTo(cp_x, cp_y, x_mid, y_mid);
   }
   sctx.strokeStyle = "black";
   sctx.stroke();
@@ -102,11 +104,12 @@ const point = {
   x: pointXCoord,
   y: 350,
   speed: 0,
-  // gravity: 0.125,
-  gravity: 0.5,
-  acceleration: 3,
-  thrust: 10,
-  // thrust: 3.6,
+  gravity: 0.25,
+//   gravity: 0.125,
+//   gravity: 0.5,
+//   thrust: 10,
+//   thrust: 3.6,
+  thrust: 5,
   frame: 0,
   draw: function () {
     if (state.curr !== state.Play) {
@@ -133,7 +136,18 @@ const point = {
       }
     }
     drawPoint(this.x, this.y);
-    drawLine(coordsHistory, this.x, this.y);
+
+    const start =
+      coordsHistory.length - 199 > 0 ? coordsHistory.length - 199 : 0;
+    const last200Coords = coordsHistory.slice(start);
+    coordsHistory = last200Coords.map((coords) => {
+      return { x: coords.x - dx, y: coords.y, date: coords.date };
+    });
+    coordsHistory.push({ x: this.x, y: this.y, date: Date.now() });
+
+    drawLine(coordsHistory);
+
+    console.log("coordsHistory: ", coordsHistory);
   },
   flap: function () {
     if (this.y < 0) return;
@@ -248,5 +262,6 @@ function gameLoop() {
 }
 
 setInterval(gameLoop, 20);
+// window.requestAnimationFrame(gameLoop);
 
 console.groupEnd();
