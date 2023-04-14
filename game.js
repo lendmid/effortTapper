@@ -16,7 +16,6 @@ const pointRadius = 35;
 const pointXCoord = 250;
 const dx = 2;
 let coordsHistory = [];
-
 const state = {
   curr: 0,
   getReady: 0,
@@ -65,6 +64,20 @@ const drawDashedLine = (y, x) => {
   sctx.save();
 };
 
+const throttle = (callback, limit) => {
+  let awaiting = false;
+  return () => {
+    if (awaiting) return
+    console.log("throttle")
+      callback.apply(this, arguments)
+      awaiting = true
+      setTimeout( () => {
+        awaiting = false;
+      }, limit)
+  }
+}
+
+
 scrn.addEventListener("click", () => {
   switch (state.curr) {
     case state.getReady:
@@ -77,7 +90,6 @@ scrn.addEventListener("click", () => {
       state.curr = state.getReady;
       point.speed = 0;
       point.y = 100;
-      // pipe.pipes = [];
       UI.score.curr = 0;
       break;
   }
@@ -143,8 +155,10 @@ const point = {
     coordsHistory = last200Coords.map((coords) => {
       return { x: coords.x - dx, y: coords.y, date: coords.date };
     });
-    coordsHistory.push({ x: this.x, y: this.y, date: Date.now() });
-
+    const data = { x: this.x, y: this.y, date: Date.now() };
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    throttle(coordsHistory.push(data), 1000);
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     drawLine(coordsHistory);
 
     console.log("coordsHistory: ", coordsHistory);
