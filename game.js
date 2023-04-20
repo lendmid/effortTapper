@@ -23,19 +23,37 @@ const state = {
   gameOver: 2,
 };
 const pointColor = "#E7E7E7";
-const bottomColor = "#00000033";
+const borderColor = "#CCCCCC";
+const lineWidth = "2";
+const fontMain = "400 35px Arial Black";
+const fontScore = "200 25px courier";
 
+const setTextStyles = (main = true) => {
+  sctx.font = main ? fontMain : fontScore;
+  // sctx.font = fontMain;
+  sctx.setLineDash([]);
+  sctx.fillStyle = "bisque";
+  sctx.strokeStyle = "black";
+  // sctx.lineWidth = "3";
+};
 const drawPoint = (x, y) => {
+  sctx.fillStyle = pointColor;
   sctx.beginPath();
   sctx.arc(x, y, pointRadius, 0, 2 * Math.PI);
-  sctx.fillStyle = pointColor;
   sctx.fill();
-  sctx.save();
+  // sctx.save();
+};
+const drawPointScore = (x, y) => {
+  setTextStyles(false);
+  let normalY = Math.floor(y / 10);
+  sctx.fillText(normalY, x + 50, y);
+  sctx.strokeText(normalY, x + 50, y);
+  // sctx.save();
 };
 
 const drawLine = (last200Coords) => {
   sctx.setLineDash([]);
-  sctx.lineWidth = 2;
+  sctx.lineWidth = lineWidth;
   sctx.beginPath();
   if (last200Coords.length < 2) return;
   for (let i = 0; i < last200Coords.length - 1; i++) {
@@ -50,33 +68,33 @@ const drawLine = (last200Coords) => {
   }
   sctx.strokeStyle = "black";
   sctx.stroke();
-  sctx.save();
+  // sctx.save();
 };
 
 const drawDashedLine = (y, x) => {
+  sctx.lineDashOffset = -x;
+  sctx.lineWidth = lineWidth;
   sctx.beginPath();
   sctx.setLineDash([15, 15]);
   sctx.moveTo(0, y);
   sctx.lineTo(1000, y);
-  sctx.strokeStyle = bottomColor;
-  sctx.lineDashOffset = -x;
+  sctx.strokeStyle = borderColor;
   sctx.stroke();
-  sctx.save();
+  // sctx.save();
 };
 
 const throttle = (callback, limit) => {
   let awaiting = false;
   return () => {
-    if (awaiting) return
-    console.log("throttle")
-      callback.apply(this, arguments)
-      awaiting = true
-      setTimeout( () => {
-        awaiting = false;
-      }, limit)
-  }
-}
-
+    if (awaiting) return;
+    console.log("throttle");
+    callback.apply(this, arguments);
+    awaiting = true;
+    setTimeout(() => {
+      awaiting = false;
+    }, limit);
+  };
+};
 
 scrn.addEventListener("click", () => {
   switch (state.curr) {
@@ -95,32 +113,15 @@ scrn.addEventListener("click", () => {
   }
 });
 
-const sibling = {
-  y: siblingHeight,
-  draw: function () {
-    drawDashedLine(this.y, sceneX);
-
-    if (state.curr !== state.Play) return;
-    sceneX -= dx;
-  },
-};
-
-const floor = {
-  y: floorHeight,
-  draw: function () {
-    drawDashedLine(this.y, sceneX);
-  },
-};
-
 const point = {
   x: pointXCoord,
   y: 350,
   speed: 0,
   gravity: 0.25,
-//   gravity: 0.125,
-//   gravity: 0.5,
-//   thrust: 10,
-//   thrust: 3.6,
+  //   gravity: 0.125,
+  //   gravity: 0.5,
+  //   thrust: 10,
+  //   thrust: 3.6,
   thrust: 5,
   frame: 0,
   draw: function () {
@@ -156,11 +157,10 @@ const point = {
       return { x: coords.x - dx, y: coords.y, date: coords.date };
     });
     const data = { x: this.x, y: this.y, date: Date.now() };
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     throttle(coordsHistory.push(data), 1000);
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     drawLine(coordsHistory);
 
+    drawPointScore(this.x, this.y);
     console.log("coordsHistory: ", coordsHistory);
   },
   flap: function () {
@@ -206,19 +206,13 @@ const UI = {
     this.drawScore();
   },
   drawScore: function () {
-    sctx.fillStyle = "white";
-    sctx.strokeStyle = "black";
-    sctx.setLineDash([]);
+    setTextStyles();
     switch (state.curr) {
       case state.Play:
-        sctx.lineWidth = "2";
-        sctx.font = "35px Squada One";
         sctx.fillText(this.score.curr, scrn.width / 2 - 5, 50);
         sctx.strokeText(this.score.curr, scrn.width / 2 - 5, 50);
         break;
       case state.gameOver:
-        sctx.lineWidth = "2";
-        sctx.font = "40px Squada One";
         let sc = `SCORE :     ${this.score.curr}`;
         try {
           this.score.best = Math.max(
@@ -246,19 +240,14 @@ const UI = {
   },
 };
 
-UI.gameOver.sprite.src = "img/gameOver.png";
-UI.getReady.sprite.src = "img/getReady.png";
-UI.tap[0].sprite.src = "img/tap1.png";
-UI.tap[1].sprite.src = "img/tap2.png";
-
 function draw() {
   sctx.fillStyle = "white";
   sctx.fillRect(0, 0, scrn.width, scrn.height);
 
-  sibling.draw();
-  floor.draw();
+  drawDashedLine(siblingHeight, sceneX);
+  drawDashedLine(floorHeight, sceneX);
+
   point.draw();
-  // historyLine.draw();
   UI.draw();
 }
 
@@ -266,16 +255,29 @@ function update() {
   // sibling.update();
   // floor.update();
   UI.update();
+
+  if (state.curr !== state.Play) return;
+  sceneX -= dx;
 }
 
 function gameLoop() {
-  update();
   draw();
+  update();
   frames++;
+
+  // window.requestAnimationFrame(gameLoop);
   // console.log("state: ", state);
 }
+const runGame = () => {
+  UI.gameOver.sprite.src = "img/gameOver.png";
+  UI.getReady.sprite.src = "img/getReady.png";
+  UI.tap[0].sprite.src = "img/tap1.png";
+  UI.tap[1].sprite.src = "img/tap2.png";
 
-setInterval(gameLoop, 20);
-// window.requestAnimationFrame(gameLoop);
+  setInterval(gameLoop, 20);
+  // window.requestAnimationFrame(gameLoop);
+};
+
+runGame();
 
 console.groupEnd();
