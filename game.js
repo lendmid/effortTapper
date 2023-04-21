@@ -16,10 +16,8 @@ const throttle = (callback, delay) => {
   let shouldWait = false;
   return (...args) => {
     if (shouldWait) return;
-    console.log(shouldWait);
     callback(...args);
     shouldWait = true;
-    console.log(shouldWait);
     setTimeout(() => {
       shouldWait = false;
     }, delay);
