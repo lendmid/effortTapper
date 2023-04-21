@@ -25,16 +25,14 @@ const state = {
 const pointColor = "#E7E7E7";
 const borderColor = "#CCCCCC";
 const lineWidth = "2";
-const fontMain = "400 35px Arial Black";
-const fontScore = "200 25px courier";
+const fontMain = "700 35px Helvetica";
+const fontScore = "400 25px courier";
 
 const setTextStyles = (main = true) => {
   sctx.font = main ? fontMain : fontScore;
-  // sctx.font = fontMain;
   sctx.setLineDash([]);
-  sctx.fillStyle = "bisque";
+  sctx.fillStyle = "black";
   sctx.strokeStyle = "black";
-  // sctx.lineWidth = "3";
 };
 const drawPoint = (x, y) => {
   sctx.fillStyle = pointColor;
@@ -210,7 +208,7 @@ const UI = {
     switch (state.curr) {
       case state.Play:
         sctx.fillText(this.score.curr, scrn.width / 2 - 5, 50);
-        sctx.strokeText(this.score.curr, scrn.width / 2 - 5, 50);
+        // sctx.strokeText(this.score.curr, scrn.width / 2 - 5, 50);
         break;
       case state.gameOver:
         let sc = `SCORE :     ${this.score.curr}`;
