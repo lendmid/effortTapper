@@ -1,5 +1,3 @@
-console.group();
-
 const RAD = Math.PI / 180;
 const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
@@ -10,30 +8,49 @@ const sceneWidth = 1000;
 const siblingHeight = 100;
 const floorHeight = 600;
 
-let frames = 0;
-let sceneX = 0;
 const pointRadius = 35;
 const pointXCoord = 250;
 const dx = 2;
+
+const throttle = (callback, delay) => {
+  let shouldWait = false;
+  return (...args) => {
+    if (shouldWait) return;
+    console.log(shouldWait);
+    callback(...args);
+    shouldWait = true;
+    console.log(shouldWait);
+    setTimeout(() => {
+      shouldWait = false;
+    }, delay);
+  };
+};
+
+let frames = 0;
+let sceneX = 0;
 let coordsHistory = [];
 const state = {
   curr: 0,
   getReady: 0,
   Play: 1,
   gameOver: 2,
+  scorePerSecond: 0,
+  scoreEarned: 0,
+  scoreScored: 0,
 };
 const pointColor = "#E7E7E7";
 const borderColor = "#CCCCCC";
 const lineWidth = "2";
-const fontMain = "700 35px Helvetica";
-const fontScore = "400 25px courier";
+const h1Font = "700 28px courier";
+const h2Font = "400 22px Tahoma";
 
-const setTextStyles = (main = true) => {
-  sctx.font = main ? fontMain : fontScore;
+const setTextStyles = (h1 = true) => {
+  sctx.font = h1 ? h1Font : h2Font;
   sctx.setLineDash([]);
   sctx.fillStyle = "black";
   sctx.strokeStyle = "black";
 };
+
 const drawPoint = (x, y) => {
   sctx.fillStyle = pointColor;
   sctx.beginPath();
@@ -41,17 +58,45 @@ const drawPoint = (x, y) => {
   sctx.fill();
   // sctx.save();
 };
-const drawPointScore = (x, y) => {
+const drawScorePerSecond = (x, y) => {
+  setTextStyles(true);
+  const hundred = siblingHeight + pointRadius;
+  const zero = floorHeight - pointRadius;
+  const minMaxHeight = zero - hundred;
+
+  let scorePerSecond = Math.abs(Math.floor((100 * (y - zero)) / minMaxHeight));
+  sctx.textAlign = "left";
+  sctx.fillText(scorePerSecond + " $/s", x + 50, y);
+
+  state.scorePerSecond = scorePerSecond;
+};
+
+const increaseScoreEarned = throttle(
+  () => (state.scoreEarned += state.scorePerSecond),
+  1000
+);
+
+const drawEarnedScore = () => {
   setTextStyles(false);
-  let normalY = Math.floor(y / 10);
-  sctx.fillText(normalY, x + 50, y);
-  sctx.strokeText(normalY, x + 50, y);
-  // sctx.save();
+  sctx.textAlign = "right";
+  sctx.fillText(state.scoreEarned + "$", scrn.width - 100, 40);
+  sctx.textAlign = "left";
+  sctx.fillStyle = "#A2A2A2";
+  sctx.fillText("earned", scrn.width - 90, 40);
+  increaseScoreEarned();
+};
+
+const drawScoredScore = () => {
+  setTextStyles();
+  sctx.textAlign = "right";
+  sctx.fillText(state.scoreEarned + "$", 150, 60);
+  sctx.textAlign = "left";
+  sctx.fillStyle = "#A2A2A2";
+  sctx.fillText("scored", 160, 60);
 };
 
 const drawLine = (last200Coords) => {
   sctx.setLineDash([]);
-  sctx.lineWidth = lineWidth;
   sctx.beginPath();
   if (last200Coords.length < 2) return;
   for (let i = 0; i < last200Coords.length - 1; i++) {
@@ -79,19 +124,6 @@ const drawDashedLine = (y, x) => {
   sctx.strokeStyle = borderColor;
   sctx.stroke();
   // sctx.save();
-};
-
-const throttle = (callback, limit) => {
-  let awaiting = false;
-  return () => {
-    if (awaiting) return;
-    console.log("throttle");
-    callback.apply(this, arguments);
-    awaiting = true;
-    setTimeout(() => {
-      awaiting = false;
-    }, limit);
-  };
 };
 
 scrn.addEventListener("click", () => {
@@ -155,11 +187,12 @@ const point = {
       return { x: coords.x - dx, y: coords.y, date: coords.date };
     });
     const data = { x: this.x, y: this.y, date: Date.now() };
-    throttle(coordsHistory.push(data), 1000);
+    coordsHistory.push(data);
+    // throtle(coordsHistory.push(data), 1000);
     drawLine(coordsHistory);
 
-    drawPointScore(this.x, this.y);
-    console.log("coordsHistory: ", coordsHistory);
+    drawScorePerSecond(this.x, this.y);
+    // console.log("coordsHistory: ", coordsHistory);
   },
   flap: function () {
     if (this.y < 0) return;
@@ -207,8 +240,8 @@ const UI = {
     setTextStyles();
     switch (state.curr) {
       case state.Play:
-        sctx.fillText(this.score.curr, scrn.width / 2 - 5, 50);
-        // sctx.strokeText(this.score.curr, scrn.width / 2 - 5, 50);
+        drawEarnedScore();
+        drawScoredScore();
         break;
       case state.gameOver:
         let sc = `SCORE :     ${this.score.curr}`;
@@ -277,5 +310,3 @@ const runGame = () => {
 };
 
 runGame();
-
-console.groupEnd();
