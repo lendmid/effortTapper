@@ -151,7 +151,6 @@ const point = {
   y: 350,
   speed: 0,
   gravity: 0.125,
-  thrust: 3.6,
   frame: 0,
   draw: function () {
 
@@ -198,7 +197,11 @@ const point = {
   },
   flap: function () {
     if (this.y < 0) return;
-    this.speed = -this.thrust;
+    let thrust = Math.sqrt(state.scorePerSecond);
+    thrust = thrust < 1 ? 3.6 : thrust
+    thrust -= 1
+    console.log("thrust: ", thrust)
+    this.speed = - thrust;
   },
   drawDashedCrosshair: function (y, x) {
     sctx.lineDashOffset = 0;
