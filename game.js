@@ -3,13 +3,14 @@ const scrn = document.getElementById("canvas");
 const sctx = scrn.getContext("2d");
 scrn.tabIndex = 1;
 
+const frmaeHeight = 700;
 const sceneHeight = 500;
 const sceneWidth = 1000;
 const siblingHeight = 100;
 const floorHeight = 600;
 
 const pointRadius = 35;
-const pointXCoord = 250;
+const pointXCoord = 350;
 const dx = 2;
 
 const throttle = (callback, delay) => {
@@ -36,9 +37,12 @@ const state = {
   scoreEarned: 0,
   scoreScored: 0,
 };
-const pointColor = "#E7E7E7";
+const pointColor = "#DCDCDC";
 const borderColor = "#CCCCCC";
-const lineWidth = "2";
+const lineWidth_0_5 = 0.5;
+const lineWidth_1 = 1;
+const lineWidth_2 = 2;
+const lineWidth_8 = 8;
 const h1Font = "700 28px courier";
 const h2Font = "400 22px Tahoma";
 
@@ -54,8 +58,8 @@ const drawPoint = (x, y) => {
   sctx.beginPath();
   sctx.arc(x, y, pointRadius, 0, 2 * Math.PI);
   sctx.fill();
-  // sctx.save();
 };
+
 const drawScorePerSecond = (x, y) => {
   setTextStyles(true);
   const hundred = siblingHeight + pointRadius;
@@ -64,7 +68,7 @@ const drawScorePerSecond = (x, y) => {
 
   let scorePerSecond = Math.abs(Math.floor((100 * (y - zero)) / minMaxHeight));
   sctx.textAlign = "left";
-  sctx.fillText(scorePerSecond + " $/s", x + 50, y);
+  sctx.fillText(scorePerSecond + " $/s", x + 45, y - 10);
 
   state.scorePerSecond = scorePerSecond;
 };
@@ -95,6 +99,7 @@ const drawScoredScore = () => {
 
 const drawLine = (last200Coords) => {
   sctx.setLineDash([]);
+  sctx.lineWidth = lineWidth_2;
   sctx.beginPath();
   if (last200Coords.length < 2) return;
   for (let i = 0; i < last200Coords.length - 1; i++) {
@@ -114,11 +119,11 @@ const drawLine = (last200Coords) => {
 
 const drawDashedLine = (y, x) => {
   sctx.lineDashOffset = -x;
-  sctx.lineWidth = lineWidth;
+  sctx.lineWidth = lineWidth_1;
   sctx.beginPath();
   sctx.setLineDash([15, 15]);
   sctx.moveTo(0, y);
-  sctx.lineTo(1000, y);
+  sctx.lineTo(sceneWidth, y);
   sctx.strokeStyle = borderColor;
   sctx.stroke();
   // sctx.save();
@@ -145,14 +150,11 @@ const point = {
   x: pointXCoord,
   y: 350,
   speed: 0,
-  gravity: 0.25,
-  //   gravity: 0.125,
-  //   gravity: 0.5,
-  //   thrust: 10,
-  //   thrust: 3.6,
-  thrust: 5,
+  gravity: 0.125,
+  thrust: 3.6,
   frame: 0,
   draw: function () {
+
     if (state.curr !== state.Play) {
       drawPoint(this.x, this.y);
       return;
@@ -176,7 +178,6 @@ const point = {
         this.y += this.speed;
       }
     }
-    drawPoint(this.x, this.y);
 
     const start =
       coordsHistory.length - 199 > 0 ? coordsHistory.length - 199 : 0;
@@ -187,6 +188,9 @@ const point = {
     const data = { x: this.x, y: this.y, date: Date.now() };
     coordsHistory.push(data);
     // throtle(coordsHistory.push(data), 1000);
+    this.drawDashedCrosshair();
+
+    drawPoint(this.x, this.y);
     drawLine(coordsHistory);
 
     drawScorePerSecond(this.x, this.y);
@@ -196,6 +200,22 @@ const point = {
     if (this.y < 0) return;
     this.speed = -this.thrust;
   },
+  drawDashedCrosshair: function (y, x) {
+    sctx.lineDashOffset = 0;
+    sctx.lineWidth = lineWidth_0_5;
+    sctx.beginPath();
+    sctx.setLineDash([15, 15]);
+
+    sctx.moveTo(this.x, 0);
+    sctx.lineTo(this.x, frmaeHeight);
+
+    sctx.moveTo(0, this.y);
+    sctx.lineTo(sceneWidth, this.y);
+
+    sctx.strokeStyle = borderColor;
+    sctx.stroke();
+    // sctx.save();
+  }
 };
 
 const UI = {
@@ -273,7 +293,7 @@ function draw() {
   sctx.fillStyle = "white";
   sctx.fillRect(0, 0, scrn.width, scrn.height);
 
-  drawDashedLine(siblingHeight, sceneX);
+  // drawDashedLine(siblingHeight, sceneX);
   drawDashedLine(floorHeight, sceneX);
 
   point.draw();
