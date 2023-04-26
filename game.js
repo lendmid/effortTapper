@@ -197,10 +197,7 @@ const point = {
   },
   flap: function () {
     if (this.y < 0) return;
-    let thrust = Math.sqrt(state.scorePerSecond);
-    thrust = thrust < 1 ? 3.6 : thrust
-    thrust -= 1
-    console.log("thrust: ", thrust)
+    let thrust = 5 - Math.log1p(state.scorePerSecond / 1.5 || 1);
     this.speed = - thrust;
   },
   drawDashedCrosshair: function (y, x) {
