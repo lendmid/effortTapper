@@ -11,6 +11,11 @@ const floorHeight = 600;
 
 const pointRadius = 35;
 const pointXCoord = 350;
+
+const maxSceneHeght = siblingHeight + pointRadius; // 135
+const minSceneHeight = floorHeight - pointRadius; // 565
+const minSceneMaxHeight = minSceneHeight - maxSceneHeght; // 440
+
 const dx = 2;
 
 const throttle = (callback, delay) => {
@@ -36,6 +41,7 @@ const state = {
   scorePerSecond: 0,
   scoreEarned: 0,
   scoreScored: 0,
+  scoreTaxed: 0,
 };
 const pointColor = "#DCDCDC";
 const borderColor = "#CCCCCC";
@@ -60,13 +66,22 @@ const drawPoint = (x, y) => {
   sctx.fill();
 };
 
+const getScorePerSecondByY = (y) => {
+  const result = Math.abs(
+    Math.floor((100 * (y - minSceneHeight)) / minSceneMaxHeight)
+  );
+  return result;
+};
+
+const getYByScorePerSecond = (score) => {
+  const minSceneMaxHeight = floorHeight - siblingHeight;
+  return Math.abs(Math.floor((minSceneMaxHeight * score) / 100 - floorHeight));
+};
+
 const drawScorePerSecond = (x, y) => {
   setTextStyles(true);
-  const hundred = siblingHeight + pointRadius;
-  const zero = floorHeight - pointRadius;
-  const minMaxHeight = zero - hundred;
 
-  let scorePerSecond = Math.abs(Math.floor((100 * (y - zero)) / minMaxHeight));
+  let scorePerSecond = getScorePerSecondByY(y);
   sctx.textAlign = "left";
   sctx.fillText(scorePerSecond + " $/s", x + 45, y - 10);
 
@@ -75,6 +90,10 @@ const drawScorePerSecond = (x, y) => {
 
 const increaseScoreEarned = throttle(
   () => (state.scoreEarned += state.scorePerSecond),
+  1000
+);
+const decreaseScoreTaxed = throttle(
+  () => (state.scoreTaxed -= 30),
   1000
 );
 
@@ -87,11 +106,19 @@ const drawEarnedScore = () => {
   sctx.fillText("earned", scrn.width - 90, 40);
   increaseScoreEarned();
 };
+const drawTaxed = () => {
+  setTextStyles(false);
+  sctx.textAlign = "right";
+  sctx.fillStyle = "red";
+  sctx.fillText(state.scoreTaxed + "$", scrn.width - 100, 70);
+  sctx.textAlign = "left";
+  sctx.fillText("taxed", scrn.width - 90, 70);
+};
 
 const drawScoredScore = () => {
   setTextStyles();
   sctx.textAlign = "right";
-  sctx.fillText(state.scoreEarned + "$", 150, 60);
+  sctx.fillText(state.scoreEarned - state.scoreTaxed + "$", 150, 60);
   sctx.textAlign = "left";
   sctx.fillStyle = "#A2A2A2";
   sctx.fillText("scored", 160, 60);
@@ -110,8 +137,19 @@ const drawLine = (last200Coords) => {
     const y_mid = (lastPoint.y + firstPoint.y) / 2;
     const cp_x = (x_mid + lastPoint.x) / 2;
     const cp_y = (y_mid + lastPoint.y) / 2;
+
     sctx.quadraticCurveTo(cp_x, cp_y, x_mid, y_mid);
   }
+  // const isTaxIntersection = firstPoint.x < tax.taxes[0].x && firstPoint.y > tax.taxes[0].y;
+  // sctx.strokeStyle = isTaxIntersection ? "red" : "black";
+
+  // const gradient = sctx.createLinearGradient(tax.taxes[0].x, siblingHeight, floorHeight, 500);
+  // gradient.addColorStop(0, "black");
+  // gradient.addColorStop(0.6, "black");
+  // gradient.addColorStop(0.8, "red");
+  // gradient.addColorStop(1, "red");
+
+  // sctx.strokeStyle = pointXCoord < tax.taxes[0].x ? "black" : gradient;
   sctx.strokeStyle = "black";
   sctx.stroke();
   // sctx.save();
@@ -146,6 +184,35 @@ scrn.addEventListener("click", () => {
   }
 });
 
+const tax = {
+  // gap: 85,
+  moving: true,
+  taxes: [],
+  draw: function () {
+    for (let tax of this.taxes) {
+      sctx.fillStyle = "#E9AAAA";
+      const taxWidth = sceneWidth - tax.x;
+      const taxHeight = getYByScorePerSecond(0) - getYByScorePerSecond(30);
+      sctx.fillRect(tax.x, tax.y, taxWidth, taxHeight);
+      if (tax.x < 900) {
+        sctx.fillStyle = "red";
+        sctx.fillText("-30 $/s", 920, tax.y + 30);
+      }
+    }
+    if (state.curr != state.Play) return;
+
+    if (frames > 200 == 0 && this.taxes.length === 0) {
+      this.taxes.push({
+        x: sceneWidth,
+        y: getYByScorePerSecond(30),
+      });
+    }
+    this.taxes.forEach((taxe) => {
+      taxe.x -= dx;
+    });
+  },
+};
+
 const point = {
   x: pointXCoord,
   y: 350,
@@ -153,7 +220,6 @@ const point = {
   gravity: 0.125,
   frame: 0,
   draw: function () {
-
     if (state.curr !== state.Play) {
       drawPoint(this.x, this.y);
       return;
@@ -193,12 +259,13 @@ const point = {
     drawLine(coordsHistory);
 
     drawScorePerSecond(this.x, this.y);
+    this.checkIsTaxIntersection()
     // console.log("coordsHistory: ", coordsHistory);
   },
   flap: function () {
     if (this.y < 0) return;
     let thrust = 5 - Math.log1p(state.scorePerSecond / 1.5 || 1);
-    this.speed = - thrust;
+    this.speed = -thrust;
   },
   drawDashedCrosshair: function (y, x) {
     sctx.lineDashOffset = 0;
@@ -215,6 +282,10 @@ const point = {
     sctx.strokeStyle = borderColor;
     sctx.stroke();
     // sctx.save();
+  },
+  checkIsTaxIntersection: function () {
+      const isTaxIntersection = this.x > tax.taxes[0].x && this.y > tax.taxes[0].y;
+      if (isTaxIntersection) decreaseScoreTaxed()
   }
 };
 
@@ -260,6 +331,7 @@ const UI = {
       case state.Play:
         drawEarnedScore();
         drawScoredScore();
+        drawTaxed();
         break;
       case state.gameOver:
         let sc = `SCORE :     ${this.score.curr}`;
@@ -294,6 +366,7 @@ function draw() {
   sctx.fillRect(0, 0, scrn.width, scrn.height);
 
   // drawDashedLine(siblingHeight, sceneX);
+  tax.draw();
   drawDashedLine(floorHeight, sceneX);
 
   point.draw();
