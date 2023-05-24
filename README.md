@@ -1,5 +1,8 @@
 ## Effort Tapper
-#### Game for discovering tax influence on efforts
+
+### [Preview](lendmid.github.io/effortTapper/)
+
+#### Game for analysis behavior of economic unit during different tax rates. Behavior represented as level of efforts or count of tapps to the screen 
 
 #### Design:
 - [Dima](https://www.figma.com/file/k54cPEZV2P3W89HRr8aecK/EffortTapper?node-id=0%3A1&t=vWlZSliEwuB4ZNWC-1)
