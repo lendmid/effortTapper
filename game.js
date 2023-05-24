@@ -39,12 +39,16 @@ const state = {
   Play: 1,
   gameOver: 2,
   scorePerSecond: 0,
-  scoreEarned: 0,
-  scoreScored: 0,
+  scoreProduced: 0,
+  scoreProfit: 0,
   scoreTaxed: 0,
+  taxPerSecond: 0,
 };
-const pointColor = "#DCDCDC";
-const borderColor = "#CCCCCC";
+const colors = {
+  textGray: "#A2A2A2",
+  pointColor: "#DCDCDC",
+  lineGray: "#CCCCCC"
+}
 const lineWidth_0_5 = 0.5;
 const lineWidth_1 = 1;
 const lineWidth_2 = 2;
@@ -60,7 +64,7 @@ const setTextStyles = (h1 = true) => {
 };
 
 const drawPoint = (x, y) => {
-  sctx.fillStyle = pointColor;
+  sctx.fillStyle = colors.pointColor;
   sctx.beginPath();
   sctx.arc(x, y, pointRadius, 0, 2 * Math.PI);
   sctx.fill();
@@ -78,50 +82,62 @@ const getYByScorePerSecond = (score) => {
   return Math.abs(Math.floor((minSceneMaxHeight * score) / 100 - floorHeight));
 };
 
-const drawScorePerSecond = (x, y) => {
+const drawHeightOfPoint = (x, y) => {
   setTextStyles(true);
 
   let scorePerSecond = getScorePerSecondByY(y);
   sctx.textAlign = "left";
-  sctx.fillText(scorePerSecond + " $/s", x + 45, y - 10);
+  sctx.fillText(scorePerSecond, x + 45, y - 10);
 
   state.scorePerSecond = scorePerSecond;
 };
 
-const increaseScoreEarned = throttle(
-  () => (state.scoreEarned += state.scorePerSecond),
+const increaseScoreProduced = throttle(
+  () => (state.scoreProduced += state.scorePerSecond),
   1000
 );
 const decreaseScoreTaxed = throttle(
   () => (state.scoreTaxed -= 30),
   1000
 );
+const setTaxPerSecond = throttle(
+  (score) => (state.taxPerSecond = score),
+  1000
+);
 
-const drawEarnedScore = () => {
+const drawProducedScore = () => {
   setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillText(state.scoreEarned + "$", scrn.width - 100, 40);
+  sctx.fillText(state.scoreProduced + "$", scrn.width - 150, 40);
   sctx.textAlign = "left";
-  sctx.fillStyle = "#A2A2A2";
-  sctx.fillText("earned", scrn.width - 90, 40);
-  increaseScoreEarned();
+  sctx.fillStyle = colors.textGray;
+  sctx.fillText("produced", scrn.width - 140, 40);
+  increaseScoreProduced();
 };
 const drawTaxed = () => {
   setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillStyle = "red";
-  sctx.fillText(state.scoreTaxed + "$", scrn.width - 100, 70);
+  sctx.fillText(state.scoreTaxed + "$", scrn.width - 150, 70);
+  sctx.fillStyle = colors.textGray;
   sctx.textAlign = "left";
-  sctx.fillText("taxed", scrn.width - 90, 70);
+  sctx.fillText("taxed", scrn.width - 140, 70);
 };
 
-const drawScoredScore = () => {
-  setTextStyles();
+const drawProfitScore = () => {
+  setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillText(state.scoreEarned - state.scoreTaxed + "$", 150, 60);
+  sctx.fillText(state.scoreProduced + state.scoreTaxed + "$", 500, 40);
   sctx.textAlign = "left";
-  sctx.fillStyle = "#A2A2A2";
-  sctx.fillText("scored", 160, 60);
+  sctx.fillStyle = colors.textGray;
+  sctx.fillText("profit", 510, 40);
+};
+const drawProfitPerSecond = () => {
+  setTextStyles(false);
+  sctx.textAlign = "right";
+  sctx.fillText(state.scorePerSecond - state.taxPerSecond + "$", 500, 70);
+  sctx.textAlign = "left";
+  sctx.fillStyle = colors.textGray;
+  sctx.fillText("profit /s", 510, 70);
 };
 
 const drawLine = (last200Coords) => {
@@ -162,7 +178,7 @@ const drawDashedLine = (y, x) => {
   sctx.setLineDash([15, 15]);
   sctx.moveTo(0, y);
   sctx.lineTo(sceneWidth, y);
-  sctx.strokeStyle = borderColor;
+  sctx.strokeStyle = colors.lineGray;
   sctx.stroke();
   // sctx.save();
 };
@@ -192,11 +208,11 @@ const tax = {
     for (let tax of this.taxes) {
       sctx.fillStyle = "#E9AAAA";
       const taxWidth = sceneWidth - tax.x;
-      const taxHeight = getYByScorePerSecond(0) - getYByScorePerSecond(30);
+      const taxHeight = getYByScorePerSecond(0) - getYByScorePerSecond(tax.taxRate);
       sctx.fillRect(tax.x, tax.y, taxWidth, taxHeight);
       if (tax.x < 900) {
         sctx.fillStyle = "red";
-        sctx.fillText("-30 $/s", 920, tax.y + 30);
+        sctx.fillText(`-${tax.taxRate} $/s"`, 920, tax.y + 30);
       }
     }
     if (state.curr != state.Play) return;
@@ -205,10 +221,11 @@ const tax = {
       this.taxes.push({
         x: sceneWidth,
         y: getYByScorePerSecond(30),
+        taxRate: 30
       });
     }
     this.taxes.forEach((taxe) => {
-      taxe.x -= dx;
+      taxe.x -= dx *2;
     });
   },
 };
@@ -258,7 +275,7 @@ const point = {
     drawPoint(this.x, this.y);
     drawLine(coordsHistory);
 
-    drawScorePerSecond(this.x, this.y);
+    drawHeightOfPoint(this.x, this.y);
     this.checkIsTaxIntersection()
     // console.log("coordsHistory: ", coordsHistory);
   },
@@ -279,13 +296,17 @@ const point = {
     sctx.moveTo(0, this.y);
     sctx.lineTo(sceneWidth, this.y);
 
-    sctx.strokeStyle = borderColor;
+    sctx.strokeStyle = colors.lineGray;
     sctx.stroke();
     // sctx.save();
   },
   checkIsTaxIntersection: function () {
-      const isTaxIntersection = this.x > tax.taxes[0].x && this.y > tax.taxes[0].y;
-      if (isTaxIntersection) decreaseScoreTaxed()
+      const isTaxIntersection = this.x > tax.taxes[0].x;
+    if (isTaxIntersection) {
+      decreaseScoreTaxed()
+      setTaxPerSecond(tax.taxes[0].taxRate)
+      console.log("state: ", state)
+    }
   }
 };
 
@@ -329,9 +350,10 @@ const UI = {
     setTextStyles();
     switch (state.curr) {
       case state.Play:
-        drawEarnedScore();
-        drawScoredScore();
+        drawProducedScore();
+        drawProfitScore();
         drawTaxed();
+        drawProfitPerSecond();
         break;
       case state.gameOver:
         let sc = `SCORE :     ${this.score.curr}`;
