@@ -225,7 +225,7 @@ const tax = {
       sctx.fillRect(tax.x, tax.y, taxWidth, taxHeight);
       if (tax.x < 900) {
         sctx.fillStyle = "red";
-        sctx.fillText(`-${tax.taxRate} $/s"`, 920, tax.y + 30);
+        sctx.fillText(`${tax.taxRate} $`, 940, tax.y + 30);
       }
     }
     if (state.curr != state.Play) return;
