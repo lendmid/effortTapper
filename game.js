@@ -33,6 +33,7 @@ const throttle = (callback, delay) => {
 let frames = 0;
 let sceneX = 0;
 let coordsHistory = [];
+
 const state = {
   curr: 0,
   getReady: 0,
@@ -43,7 +44,9 @@ const state = {
   scoreProfit: 0,
   scoreTaxed: 0,
   taxPerSecond: 0,
+  startGameTime: null
 };
+
 const colors = {
   textGray: "#A2A2A2",
   pointColor: "#DCDCDC",
@@ -139,6 +142,16 @@ const drawProfitPerSecond = () => {
   sctx.fillStyle = colors.textGray;
   sctx.fillText("profit /s", 510, 70);
 };
+const drawTimer = () => {
+  setTextStyles(false);
+  sctx.textAlign = "right";
+  const secondsFromStart = Math.floor(Date.now() - state.startGameTime) / (1000)
+  const leftTimer = state.startGameTime ? new Date(new Date(0, 0, 0, 0, secondsFromStart, 0)) : new Date(0, 0, 0, 0, 0, 0)
+  sctx.fillText(leftTimer.toLocaleTimeString("en-GB") + " /", 200, 70);
+  sctx.textAlign = "left";
+  const rightTimer = new Date(2000, 0, 0, 2, 0, 0).toLocaleTimeString("en-GB")
+  sctx.fillText(rightTimer, 208, 70);
+};
 
 const drawLine = (last200Coords) => {
   sctx.setLineDash([]);
@@ -225,7 +238,7 @@ const tax = {
       });
     }
     this.taxes.forEach((taxe) => {
-      taxe.x -= dx *2;
+      taxe.x -= dx * 2;
     });
   },
 };
@@ -301,12 +314,13 @@ const point = {
     // sctx.save();
   },
   checkIsTaxIntersection: function () {
-      const isTaxIntersection = this.x > tax.taxes[0].x;
-    if (isTaxIntersection) {
-      decreaseScoreTaxed()
-      setTaxPerSecond(tax.taxes[0].taxRate)
-      console.log("state: ", state)
-    }
+    const isTaxIntersection = this.x > tax.taxes[0].x;
+
+    if (!isTaxIntersection) return
+    decreaseScoreTaxed()
+    setTaxPerSecond(tax.taxes[0].taxRate)
+    if (!state.startGameTime) state.startGameTime = Date.now();
+    console.log("state: ", state)
   }
 };
 
@@ -354,6 +368,7 @@ const UI = {
         drawProfitScore();
         drawTaxed();
         drawProfitPerSecond();
+        drawTimer();
         break;
       case state.gameOver:
         let sc = `SCORE :     ${this.score.curr}`;
