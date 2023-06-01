@@ -44,7 +44,8 @@ const state = {
   scoreProfit: 0,
   scoreTaxed: 0,
   taxPerSecond: 0,
-  startGameTime: null
+  startGameTime: null,
+  timerValue: null
 };
 
 const colors = {
@@ -107,6 +108,13 @@ const setTaxPerSecond = throttle(
   (score) => (state.taxPerSecond = score),
   1000
 );
+const setTimerValue = throttle(
+  () => {
+    const secondsFromStart = Math.floor(Date.now() - state.startGameTime) / (1000)
+    state.timerValue = state.startGameTime ? new Date(new Date(0, 0, 0, 0, secondsFromStart, 0)) : new Date(0, 0, 0, 0, 0, 0)
+  },
+  1000
+);
 
 const drawProducedScore = () => {
   setTextStyles(false);
@@ -142,11 +150,10 @@ const drawProfitPerSecond = () => {
   sctx.fillText("profit /s", 510, 70);
 };
 const drawTimer = () => {
+  if (!state.timerValue) setTimerValue()
   setTextStyles(false);
   sctx.textAlign = "right";
-  const secondsFromStart = Math.floor(Date.now() - state.startGameTime) / (1000)
-  const leftTimer = state.startGameTime ? new Date(new Date(0, 0, 0, 0, secondsFromStart, 0)) : new Date(0, 0, 0, 0, 0, 0)
-  sctx.fillText(leftTimer.toLocaleTimeString("en-GB") + " /", 200, 70);
+  sctx.fillText(state.timerValue?.toLocaleTimeString("en-GB") + " /", 200, 70);
   sctx.textAlign = "left";
   const rightTimer = new Date(2000, 0, 0, 2, 0, 0).toLocaleTimeString("en-GB")
   sctx.fillText(rightTimer, 208, 70);
@@ -318,6 +325,7 @@ const point = {
     if (!isTaxIntersection) return
     decreaseScoreTaxed()
     increaseScoreProduced();
+    setTimerValue()
     setTaxPerSecond(tax.taxes[0].taxRate)
     if (!state.startGameTime) state.startGameTime = Date.now();
     console.log("state: ", state)
