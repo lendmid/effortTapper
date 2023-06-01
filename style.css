@@ -5,7 +5,7 @@ body {
 main {
     display: grid;
     place-items: center;
-    gap: 10px;
+    gap: 40px;
     padding: 40px;
     background-color: white;
 
@@ -15,7 +15,8 @@ main {
     padding: 10px 20px;
     border-radius: 10px;
     background-color: black;
-    color: white
+    color: white;
+    margin-top: 40px;
 }
 
 nav {
@@ -27,8 +28,17 @@ nav {
     font-size: 18px;
 }
 
+.wrapper {
+    display: grid;
+    gap: 15px;
+    place-items: center;
+}
+
 a,
-h1 {
+h1,
+h2,
+h3,
+h4 {
     text-decoration: none;
     user-select: none;
     margin: 0;
@@ -42,7 +52,7 @@ h1 {
 }
 
 #uniqCode {
-    width: 300px;
+    width: 150px;
     padding: 10px 20px;
     margin: 0 10px;
     border-radius: 5px;
@@ -60,7 +70,7 @@ input {
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 350px;
+    width: 200px;
     background-color: #555;
     color: #fff;
     text-align: center;
@@ -70,7 +80,7 @@ input {
     z-index: 1;
     bottom: 150%;
     left: 50%;
-    margin-left: -175px;
+    margin-left: -100px;
     opacity: 0;
     transition: opacity 0.3s;
 }

@@ -13,30 +13,47 @@
 <body style="background-color: #404040;">
     <main>
         <h1>Education screen</h1>
-        <h3>It's your uniq code. Click for copy to clipboard</h3>
+        <div class="wrapper">
+            <h3>It's your uniq code</h3>
+            <h4>Click for copy to clipboard and in couple of seconds you will start the game</h4>
+        </div>
         <div class="tooltip">
             <span class="tooltiptext" id="tooltip">Copy to clipboard</span>
-            <input type="text" value="Hello World" id="uniqCode"  onclick="myFunction()" onmouseout="outFunc()">
+            <input type="text" value="Hello World" id="uniqCode" onclick="handleCopyClick()" onmouseout="outFunc()">
         </div>
         <script type=" text/javascript">
                 const myInput = document.getElementById("uniqCode");
-                myInput.value = crypto.randomUUID()
+                const UUID = getUniqueId()
 
-                function myFunction() {
+                myInput.value = UUID
+
+                function handleCopyClick() {
                     myInput.select();
                     myInput.setSelectionRange(0, 99999);
                     navigator.clipboard.writeText(myInput.value);
                     
                     const tooltip = document.getElementById("tooltip");
-                    tooltip.innerHTML = "Copied: " + myInput.value;
+                    tooltip.innerHTML = `<b>Copied: </b> ${myInput.value}`;
+
+                    const searchParams = new URLSearchParams(window.location.search);
+                    searchParams.set("UUID", UUID);
+                    // window.location.search = searchParams.toString(); 
+
+
+                    setTimeout(() => {
+                        window.location.href = `./game.html?${searchParams.toString()}`;
+                    }, 1500)
                 }
-                
+                function getUniqueId () {
+                    const dateString = Date.now().toString(36);
+                    const randomness = Math.random().toString(36).substr(2);
+                    return dateString + randomness;
+                  };
                 function outFunc() {
                     const tooltip = document.getElementById("uniqCode");
                     tooltip.innerHTML = "Copy to clipboard";
                 }
             </script>
-        <a class="next" href="./game.html">Next</a>
     </main>
 
 </body>
