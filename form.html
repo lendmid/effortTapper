@@ -12,12 +12,43 @@
 <body style="background-color: #404040;">
 
     <main>
+
+        <h1>Final form screen</h1>
+        <div class="wrapper">
+            <h3>It's your uniq code</h3>
+            <h4>Please click for copy it to clipboard and paste to the form for end up game session</h4>
+        </div>
+        <div class="tooltip">
+            <span class="tooltiptext" id="tooltip">Copy to clipboard</span>
+            <input type="text" value="Hello World" id="uniqCode" onclick="handleCopyClick()" onmouseout="outFunc()">
+        </div>
+
+
         <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdw1E4olPD3VAj8J4jR59ezXVVZfSyciFtgYy829TX2Ez3KAg/viewform?embedded=true" width="640"
             height="383" frameborder="0" marginheight="0" marginwidth="0">
             Загрузка…
         </iframe>
 
     </main>
+
+
+    <script type=" text/javascript">
+        const myInput = document.getElementById("uniqCode");
+        const urlParams = new URLSearchParams(window.location.search);
+
+        myInput.value = urlParams.get('UUID');
+
+        
+        function handleCopyClick() {
+            myInput.select();
+            myInput.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(myInput.value);
+            
+            const tooltip = document.getElementById("tooltip");
+            tooltip.innerHTML = `<b>Copied: </b> ${myInput.value}`;
+        }
+    </script>
+
 </body>
 
 </html>

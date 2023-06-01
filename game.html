@@ -15,9 +15,19 @@
     <canvas id="canvas" width="1000" height="700"></canvas>
 
     <main>
-        <a class="next" href="./form.html">Next</a>
+        <div class="next" onclick="handleNext()">Next</div>
     </main>
     <script src="game.js"></script>
+
+    <script type=" text/javascript">
+        const searchParams = new URLSearchParams(window.location.search);
+        
+        function handleNext () {
+            setTimeout(() => {
+                window.location.href = `./form.html?${searchParams.toString()}`;
+            }, 700)
+        } 
+    </script>
 </body>
 
 </html>
