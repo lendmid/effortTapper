@@ -1,3 +1,35 @@
+body {
+    margin: 0;
+}
+
+main {
+    display: grid;
+    place-items: center;
+    padding: 40px;
+    background-color: white;
+
+}
+
+.next {
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: black;
+    color: white
+}
+
+nav {
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    padding: 20px;
+    font-size: 18px;
+}
+
+a {
+    text-decoration: none;
+}
+
 #canvas {
     background-color: #30c0df;
     border: 2px solid black;
