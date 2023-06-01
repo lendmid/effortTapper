@@ -115,7 +115,6 @@ const drawProducedScore = () => {
   sctx.textAlign = "left";
   sctx.fillStyle = colors.textGray;
   sctx.fillText("produced", scrn.width - 140, 40);
-  increaseScoreProduced();
 };
 const drawTaxed = () => {
   setTextStyles(false);
@@ -318,6 +317,7 @@ const point = {
 
     if (!isTaxIntersection) return
     decreaseScoreTaxed()
+    increaseScoreProduced();
     setTaxPerSecond(tax.taxes[0].taxRate)
     if (!state.startGameTime) state.startGameTime = Date.now();
     console.log("state: ", state)
