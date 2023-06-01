@@ -13,6 +13,29 @@
 <body style="background-color: #404040;">
     <main>
         <h1>Education screen</h1>
+        <h3>It's your uniq code. Click for copy to clipboard</h3>
+        <div class="tooltip">
+            <span class="tooltiptext" id="tooltip">Copy to clipboard</span>
+            <input type="text" value="Hello World" id="uniqCode"  onclick="myFunction()" onmouseout="outFunc()">
+        </div>
+        <script type=" text/javascript">
+                const myInput = document.getElementById("uniqCode");
+                myInput.value = crypto.randomUUID()
+
+                function myFunction() {
+                    myInput.select();
+                    myInput.setSelectionRange(0, 99999);
+                    navigator.clipboard.writeText(myInput.value);
+                    
+                    const tooltip = document.getElementById("tooltip");
+                    tooltip.innerHTML = "Copied: " + myInput.value;
+                }
+                
+                function outFunc() {
+                    const tooltip = document.getElementById("uniqCode");
+                    tooltip.innerHTML = "Copy to clipboard";
+                }
+            </script>
         <a class="next" href="./game.html">Next</a>
     </main>
 
