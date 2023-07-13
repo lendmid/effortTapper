@@ -383,7 +383,7 @@ const UI = {
         for (key in state) {
           searchParams.append(key, state[key]);
         }
-        window.location.href = `./form.html?${searchParams.toString()}`;
+        window.location.href = `./final.html?${searchParams.toString()}`;
       }, 1500)
     }
 

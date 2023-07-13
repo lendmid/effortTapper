@@ -13,7 +13,7 @@
 
     <main>
 
-        <h1>Final form screen</h1>
+        <h1>Final screen</h1>
         <div class="wrapper">
             <h3>It's your uniq code</h3>
             <h4>Please click for copy it to clipboard and paste to the form for end up game session</h4>
@@ -21,6 +21,10 @@
         <div class="tooltip">
             <span class="tooltiptext" id="tooltip">Copy to clipboard</span>
             <input type="text" value="Hello World" id="uniqCode" onclick="handleCopyClick()" onmouseout="outFunc()">
+        </div>
+        <div>
+            <h3>Game results: </h3>
+            <textarea type="text" id="stateTextarea" style="width: 400px; height: 200px"></textarea>
         </div>
 
 
@@ -33,11 +37,15 @@
 
 
     <script type=" text/javascript">
-        const myInput = document.getElementById("uniqCode");
         const urlParams = new URLSearchParams(window.location.search);
-
+        
+        const paramsObject = Object.fromEntries(urlParams)
+        
+        const myInput = document.getElementById("uniqCode");
         myInput.value = urlParams.get('UUID');
-
+        
+        const stateTextarea = document.getElementById("stateTextarea");
+        stateTextarea.value = JSON.stringify(paramsObject);
         
         function handleCopyClick() {
             myInput.select();
