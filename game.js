@@ -199,7 +199,6 @@ const drawDashedLine = (y, x) => {
   sctx.lineTo(sceneWidth, y);
   sctx.strokeStyle = colors.lineGray;
   sctx.stroke();
-  // sctx.save();
 };
 
 scrn.addEventListener("click", () => {
@@ -224,7 +223,9 @@ const tax = {
   moving: true,
   taxes: [],
   draw: function () {
-    for (let tax of this.taxes) {
+    for (let i = 0; i < this.taxes.length; i++) {
+      const tax = this.taxes[i];
+
       sctx.fillStyle = "#E9AAAA";
       const taxWidth = sceneWidth - tax.x;
       const taxHeight = getYByScorePerSecond(0) - getYByScorePerSecond(tax.taxRate);
@@ -244,14 +245,14 @@ const tax = {
       });
     }
     this.taxes.forEach((taxe) => {
-      taxe.x -= dx * 2;
+      taxe.x -= dx;
     });
   },
 };
 
 const point = {
   x: pointXCoord,
-  y: 350,
+  y: 560,
   speed: 0,
   gravity: 0.125,
   frame: 0,
@@ -321,7 +322,6 @@ const point = {
   },
   checkIsTaxIntersection: function () {
     const isTaxIntersection = this.x > tax.taxes[0].x;
-
     if (!isTaxIntersection) return
     decreaseScoreTaxed()
     increaseScoreProduced();
@@ -409,8 +409,6 @@ const UI = {
 function draw() {
   sctx.fillStyle = "white";
   sctx.fillRect(0, 0, scrn.width, scrn.height);
-
-  // drawDashedLine(siblingHeight, sceneX);
   tax.draw();
   drawDashedLine(floorHeight, sceneX);
 
@@ -419,8 +417,6 @@ function draw() {
 }
 
 function update() {
-  // sibling.update();
-  // floor.update();
   UI.update();
 
   if (state.curr !== state.Play) return;
@@ -431,9 +427,6 @@ function gameLoop() {
   draw();
   update();
   frames++;
-
-  // window.requestAnimationFrame(gameLoop);
-  // console.log("state: ", state);
 }
 const runGame = () => {
   UI.gameOver.sprite.src = "img/gameOver.png";
@@ -442,7 +435,6 @@ const runGame = () => {
   UI.tap[1].sprite.src = "img/tap2.png";
 
   setInterval(gameLoop, 20);
-  // window.requestAnimationFrame(gameLoop);
 };
 
 runGame();
