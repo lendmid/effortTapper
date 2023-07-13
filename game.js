@@ -35,17 +35,17 @@ let sceneX = 0;
 let coordsHistory = [];
 
 const state = {
-  curr: 0,
-  getReady: 0,
-  Play: 1,
-  gameOver: 2,
+  currentGameStep: 0,
+  indexGameStep: 0,
+  playGameStep: 1,
+  finalScreenGameStep: 2,
   scorePerSecond: 0,
   scoreProduced: 0,
   scoreProfit: 0,
   scoreTaxed: 0,
   taxPerSecond: 0,
   startGameTime: null,
-  timerValue: null
+  leftTimerValue: null
 };
 
 const colors = {
@@ -108,10 +108,10 @@ const setTaxPerSecond = throttle(
   (score) => (state.taxPerSecond = score),
   1000
 );
-const setTimerValue = throttle(
+const setLeftTimerValue = throttle(
   () => {
     const secondsFromStart = Math.floor(Date.now() - state.startGameTime) / (1000)
-    state.timerValue = state.startGameTime ? new Date(new Date(0, 0, 0, 0, secondsFromStart, 0)) : new Date(0, 0, 0, 0, 0, 0)
+    state.leftTimerValue = state.startGameTime ? new Date(new Date(0, 0, 0, 0, secondsFromStart, 0)) : new Date(0, 0, 0, 0, 0, 0)
   },
   1000
 );
@@ -150,12 +150,12 @@ const drawProfitPerSecond = () => {
   sctx.fillText("profit /s", 510, 70);
 };
 const drawTimer = () => {
-  if (!state.timerValue) setTimerValue()
+  if (!state.leftTimerValue) setLeftTimerValue()
   setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillText(state.timerValue?.toLocaleTimeString("en-GB") + " /", 200, 70);
+  sctx.fillText(state.leftTimerValue?.toLocaleTimeString("en-GB") + " /", 200, 70);
   sctx.textAlign = "left";
-  const rightTimer = new Date(2000, 0, 0, 2, 0, 0).toLocaleTimeString("en-GB")
+  const rightTimer = new Date(2000, 0, 0, 1, 0, 0).toLocaleTimeString("en-GB")
   sctx.fillText(rightTimer, 208, 70);
 };
 
@@ -202,19 +202,19 @@ const drawDashedLine = (y, x) => {
 };
 
 scrn.addEventListener("click", () => {
-  switch (state.curr) {
-    case state.getReady:
-      state.curr = state.Play;
+  switch (state.currentGameStep) {
+    case state.indexGameStep:
+      state.currentGameStep = state.playGameStep;
       break;
-    case state.Play:
+    case state.playGameStep:
       point.flap();
       break;
-    case state.gameOver:
-      state.curr = state.getReady;
-      point.speed = 0;
-      point.y = 100;
-      UI.score.curr = 0;
-      break;
+    // case state.finalScreenGameStep:
+      // state.currentGameStep = state.indexGameStep;
+      // point.speed = 0;
+      // point.y = 100;
+      // UI.score.currentGameStep = 0;
+      // break;
   }
 });
 
@@ -235,7 +235,7 @@ const tax = {
         sctx.fillText(`${tax.taxRate} $`, 940, tax.y + 30);
       }
     }
-    if (state.curr != state.Play) return;
+    if (state.currentGameStep != state.playGameStep) return;
 
     if (frames > 200 == 0 && this.taxes.length === 0) {
       this.taxes.push({
@@ -257,7 +257,7 @@ const point = {
   gravity: 0.125,
   frame: 0,
   draw: function () {
-    if (state.curr !== state.Play) {
+    if (state.currentGameStep !== state.playGameStep) {
       drawPoint(this.x, this.y);
       return;
     }
@@ -321,11 +321,11 @@ const point = {
     // sctx.save();
   },
   checkIsTaxIntersection: function () {
-    const isTaxIntersection = this.x > tax.taxes[0].x;
+    const isTaxIntersection = this.x > tax.taxes[0]?.x;
     if (!isTaxIntersection) return
     decreaseScoreTaxed()
     increaseScoreProduced();
-    setTimerValue()
+    setLeftTimerValue()
     setTaxPerSecond(tax.taxes[0].taxRate)
     if (!state.startGameTime) state.startGameTime = Date.now();
     console.log("state: ", state)
@@ -333,74 +333,61 @@ const point = {
 };
 
 const UI = {
-  getReady: { sprite: new Image() },
+  indexGameStep: { sprite: new Image() },
   gameOver: { sprite: new Image() },
   tap: [{ sprite: new Image() }, { sprite: new Image() }],
-  score: {
-    curr: 0,
-    best: 0,
-  },
   x: 0,
   y: 0,
   tx: 0,
   ty: 0,
   frame: 0,
   draw: function () {
-    switch (state.curr) {
-      case state.getReady:
-        this.y = parseFloat(scrn.height - this.getReady.sprite.height) / 2;
-        this.x = parseFloat(scrn.width - this.getReady.sprite.width) / 2;
-        this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
-        this.ty =
-          this.y + this.getReady.sprite.height - this.tap[0].sprite.height;
-        sctx.drawImage(this.getReady.sprite, this.x, this.y);
-        sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);
+    switch (state.currentGameStep) {
+      case state.indexGameStep:
+          this.y = parseFloat(scrn.height - this.indexGameStep.sprite.height) / 2;
+          this.x = parseFloat(scrn.width - this.indexGameStep.sprite.width) / 2;
+          this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
+          this.ty =
+            this.y + this.indexGameStep.sprite.height - this.tap[0].sprite.height;
+          sctx.drawImage(this.indexGameStep.sprite, this.x, this.y);
+        sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);   
         break;
-      case state.gameOver:
-        this.y = parseFloat(scrn.height - this.gameOver.sprite.height) / 2;
-        this.x = parseFloat(scrn.width - this.gameOver.sprite.width) / 2;
-        this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
-        this.ty =
+      case state.finalScreenGameStep:
+          this.y = parseFloat(scrn.height - this.gameOver.sprite.height) / 2;
+          this.x = parseFloat(scrn.width - this.gameOver.sprite.width) / 2;
+          this.tx = parseFloat(scrn.width - this.tap[0].sprite.width) / 2;
+          this.ty =
           this.y + this.gameOver.sprite.height - this.tap[0].sprite.height;
-        sctx.drawImage(this.gameOver.sprite, this.x, this.y);
-        sctx.drawImage(this.tap[this.frame].sprite, this.tx, this.ty);
+          
+        sctx.fillStyle = "white";
+          // sctx.fillRect(this.x - 150, this.y - 80, 400, 200);
+          sctx.drawImage(this.gameOver.sprite, this.x, this.y);
         break;
     }
     this.drawScore();
   },
   drawScore: function () {
     setTextStyles();
-    switch (state.curr) {
-      case state.Play:
-        drawProducedScore();
-        drawProfitScore();
-        drawTaxed();
-        drawProfitPerSecond();
-        drawTimer();
-        break;
-      case state.gameOver:
-        let sc = `SCORE :     ${this.score.curr}`;
-        try {
-          this.score.best = Math.max(
-            this.score.curr,
-            localStorage.getItem("best")
-          );
-          localStorage.setItem("best", this.score.best);
-          let bs = `BEST  :     ${this.score.best}`;
-          sctx.fillText(sc, scrn.width / 2 - 80, scrn.height / 2);
-          sctx.strokeText(sc, scrn.width / 2 - 80, scrn.height / 2);
-          sctx.fillText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
-          sctx.strokeText(bs, scrn.width / 2 - 80, scrn.height / 2 + 30);
-        } catch (e) {
-          sctx.fillText(sc, scrn.width / 2 - 85, scrn.height / 2 + 15);
-          sctx.strokeText(sc, scrn.width / 2 - 85, scrn.height / 2 + 15);
-        }
-
-        break;
-    }
+    drawProducedScore();
+    drawProfitScore();
+    drawTaxed();
+    drawProfitPerSecond();
+    drawTimer();
   },
   update: function () {
-    if (state.curr === state.Play) return;
+    if (state.startGameTime && state.startGameTime + 60000 < Date.now()) {
+      state.currentGameStep = state.finalScreenGameStep
+
+      setTimeout(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        for (key in state) {
+          searchParams.append(key, state[key]);
+        }
+        window.location.href = `./form.html?${searchParams.toString()}`;
+      }, 1500)
+    }
+
+    if (state.currentGameStep === state.playGameStep) return;
     this.frame += frames % 10 === 0 ? 1 : 0;
     this.frame = this.frame % this.tap.length;
   },
@@ -418,8 +405,7 @@ function draw() {
 
 function update() {
   UI.update();
-
-  if (state.curr !== state.Play) return;
+  if (state.currentGameStep !== state.playGameStep) return;
   sceneX -= dx;
 }
 
@@ -428,9 +414,10 @@ function gameLoop() {
   update();
   frames++;
 }
+
 const runGame = () => {
   UI.gameOver.sprite.src = "img/gameOver.png";
-  UI.getReady.sprite.src = "img/getReady.png";
+  UI.indexGameStep.sprite.src = "img/getReady.png";
   UI.tap[0].sprite.src = "img/tap1.png";
   UI.tap[1].sprite.src = "img/tap2.png";
 
