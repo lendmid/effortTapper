@@ -45,7 +45,8 @@ const state = {
   scoreTaxed: 0,
   taxPerSecond: 0,
   startGameTime: null,
-  leftTimerValue: null
+  leftTimerValue: null,
+  tapsCounts: 0
 };
 
 const colors = {
@@ -303,6 +304,7 @@ const point = {
     if (this.y < 0) return;
     let thrust = 5 - Math.log1p(state.scorePerSecond / 1.5 || 1);
     this.speed = -thrust;
+    if (state.startGameTime) state.tapsCounts += 1
   },
   drawDashedCrosshair: function (y, x) {
     sctx.lineDashOffset = 0;

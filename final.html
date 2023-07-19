@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="style.css">
-    <title>FlappyBird</title>
+    <title>EffortTapper</title>
 </head>
 
-<body style="background-color: #404040;">
-    <main>
-
-        <h1>Final screen</h1>
+<body>
+    <main class="final">
+        <div>
+            <h1>Thank you for participation</h1>
+        </div>
         <div class="wrapper">
             <h3>It's your uniq code</h3>
             <h4>Please click for copy it to clipboard and paste to the form for end up game session</h4>
@@ -21,14 +22,14 @@
             <span class="tooltiptext" id="tooltip">Copy to clipboard</span>
             <input type="text" value="Hello World" id="uniqCode" onclick="handleCopyClick()" onmouseout="outFunc()">
         </div>
-        <div>
+        <!-- <div>
             <h3>Game results: </h3>
             <textarea type="text" id="stateTextarea" style="width: 400px; height: 200px"></textarea>
-        </div>
+        </div> -->
+        <hr>
 
-
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdw1E4olPD3VAj8J4jR59ezXVVZfSyciFtgYy829TX2Ez3KAg/viewform?embedded=true" width="640"
-            height="383" frameborder="0" marginheight="0" marginwidth="0">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdw1E4olPD3VAj8J4jR59ezXVVZfSyciFtgYy829TX2Ez3KAg/viewform?embedded=true"
+            frameborder="0" marginheight="0" marginwidth="0">
             Загрузка…
         </iframe>
 
