@@ -1,6 +1,6 @@
 ## Effort Tapper
 
-### [Preview](lendmid.github.io/effortTapper/)
+### [Preview](https://github.com/lendmid/effortTapper)
 
 #### Game for analysis behavior of economic unit during different tax rates. Behavior represented as level of efforts or count of tapps to the screen 
 
