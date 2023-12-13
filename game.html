@@ -10,6 +10,33 @@
 </head>
 
 <body>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDMq2VSE2fBCvpmCOcmwTSV_wnorslexw0",
+        authDomain: "effort-tapper.firebaseapp.com",
+        databaseURL: "https://effort-tapper-default-rtdb.firebaseio.com",
+        projectId: "effort-tapper",
+        storageBucket: "effort-tapper.appspot.com",
+        messagingSenderId: "1000034285154",
+        appId: "1:1000034285154:web:a6f1e84c5f4f2a236b033b",
+      };
+
+      window.app = initializeApp(firebaseConfig);
+
+      window.db = getDatabase(window.app);
+      window.dbFunctions = {
+        ref,
+        set,
+      }
+    </script>
+
     <canvas id="canvas" width="1000" height="700"></canvas>
 
     <script src="game.js"></script>
