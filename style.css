@@ -36,6 +36,7 @@ hr {
 
 .final {
     width: 1000px;
+    display: none;
 }
 
 /* global */

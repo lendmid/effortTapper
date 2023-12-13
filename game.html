@@ -5,6 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css">
     <title>EffortTapper</title>
 </head>
@@ -28,16 +36,186 @@
         appId: "1:1000034285154:web:a6f1e84c5f4f2a236b033b",
       };
 
-      window.app = initializeApp(firebaseConfig);
-
-      window.db = getDatabase(window.app);
+      const app = initializeApp(firebaseConfig);
+      window.db = getDatabase(app);
       window.dbFunctions = {
         ref,
         set,
       }
+
+      window.onload = () => {
+        const questions = [
+          {
+            label: "01. reserved",
+            question: "I see myself as someone who <b>is reserved</b>",
+          },
+          {
+              label: '02. trusting',
+              question: 'I see myself as someone who <b>is generally trusting</b>'
+          },
+          {
+              label: '03. lazy',
+              question: 'I see myself as someone who <b>tends to be lazy </b>'
+          },
+          {
+              label: '04. relaxed',
+              question: 'I see myself as someone who <b>is relaxed, handles stress well</b>'
+          },
+          {
+              label: '05. artistic',
+              question: 'I see myself as someone who <b>has few artistic interests</b>'
+          },
+          {
+              label: '06. outgoing',
+              question: 'I see myself as someone who <b>is outgoing, sociable</b>'
+          },
+          {
+              label: '07. others_fault',
+              question: 'I see myself as someone who <b>tends to find fault with others</b>'
+          },
+          {
+              label: '08. thorough_job',
+              question: 'I see myself as someone who <b>does a thorough job</b>'
+          },
+          {
+              label: '09. nervous',
+              question: 'I see myself as someone who <b>gets nervous easily</b>'
+          },
+          {
+              label: '10. imagination',
+              question: 'I see myself as someone who <b>has an active imagination</b>'
+          },
+        ];
+        const questionsLayout = questions
+          .map(
+            ({ label, question }, index) => `<div class="row">
+          <div class="input-field col s12">
+            <p for="${label}">${question}</p>
+            <div>
+              <input
+                name="${label}"
+                type="radio"
+                id="${label}_1"
+                value="1"
+                data-error="#e${index}"
+                required
+              />
+              <label for="${label}_1">1. Disagree strongly</label>
+            </div>
+            <p>
+              <input name="${label}" type="radio" id="${label}_2" value="2" />
+              <label for="${label}_2">2. Disagree a little</label>
+            </p>
+            <p>
+              <input name="${label}" type="radio" id="${label}_3" value="3" />
+              <label for="${label}_3">3. Neither agree nor disagree</label>
+            </p>
+
+            <p>
+              <input name="${label}" type="radio" id="${label}_4" value="4" />
+              <label for="${label}_4">4. Agree a little</label>
+            </p>
+
+            <p>
+              <input name="${label}" type="radio" id="${label}_5" value="5" />
+              <label for="${label}_5">5. Agree strongly</label>
+            </p>
+            <div class="input-field">
+              <br />
+              <div id="e${index}"></div>
+            </div>
+          </div>
+        </div>`
+          )
+          .join("");
+
+        document
+          .querySelector(".row.last")
+          .insertAdjacentHTML("beforebegin", questionsLayout);
+
+        const form = document.getElementById("myForm");
+        const submitButton = document.getElementById("submit");
+
+        const toggleButtonDisabled = () => {
+          const formData = new FormData(form);
+          const values = Object.fromEntries(formData);
+          if (Object.keys(values).length === questions.length)
+            submitButton.disabled = false;
+        };
+        form.addEventListener("input", toggleButtonDisabled);
+
+        const handleSubmit = (e) => {
+          e.preventDefault();
+          submitButton.style.display = "none";
+          const wait = document.createElement("div");
+          wait.innerHTML = "Wait...";
+          form.appendChild(wait);
+          const formData = new FormData(form);
+          const values = {};
+          formData.forEach(function (value, key) {
+            values[key] = value;
+          });
+          const urlParams = new URLSearchParams(window.location.search);
+          const id = urlParams.get("UUID");
+          if (id) {
+            set(ref(db, `${id}/questionnaire`), JSON.stringify(values))
+              .then(() => {
+                wait.innerHTML = "Thank you!";
+              })
+              .catch(() => {
+                wait.remove();
+                submitButton.style.display = "block";
+              });
+          }
+        };
+        form.addEventListener("submit", handleSubmit);
+      };
     </script>
 
     <canvas id="canvas" width="1000" height="700"></canvas>
+
+    <main class="final">
+      <div>
+        <h1>Thank you for participation</h1>
+      </div>
+      <hr />
+
+      <form name="myForm" id="myForm" action="" method="GET">
+        <div class="row">
+          <div class="input-field col s12">
+            <h4>Economic survey experiment</h4>
+            <p>
+              Please fill the next form. All questions are anonymous and the
+              results will be used only for scientific purposes.
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="input-field col s12">
+            <p>
+              Here are a number of characteristics that may or may not apply to
+              you. Please choose a number next to each statement to indicate the
+              extent to which you agree or disagree with that statement.
+            </p>
+            <b>I see myself as someone who …</b>
+          </div>
+        </div>
+
+        <div class="row last">
+          <div class="input-field col m6 s12">
+            <button
+              type="submit"
+              id="submit"
+              class="waves-effect waves-light btn-large"
+              disabled
+            >
+              <i class="material-icons right">backup</i>Submit
+            </button>
+          </div>
+        </div>
+      </form>
+    </main>
 
     <script src="game.js"></script>
 </body>
