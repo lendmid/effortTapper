@@ -36,9 +36,8 @@
         appId: "1:1000034285154:web:a6f1e84c5f4f2a236b033b",
       };
 
-      window.app = initializeApp(firebaseConfig);
-
-      window.db = getDatabase(window.app);
+      const app = initializeApp(firebaseConfig);
+      window.db = getDatabase(app);
       window.dbFunctions = {
         ref,
         set,
@@ -159,9 +158,7 @@
           const urlParams = new URLSearchParams(window.location.search);
           const id = urlParams.get("UUID");
           if (id) {
-            set(ref(db, id), {
-              survey: JSON.stringify(values),
-            })
+            set(ref(db, `${id}/questionnaire`), JSON.stringify(values))
               .then(() => {
                 wait.innerHTML = "Thank you!";
               })

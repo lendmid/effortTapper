@@ -18,6 +18,8 @@ const minSceneMaxHeight = minSceneHeight - maxSceneHeght; // 440
 
 const dx = 2;
 
+let interval = 0
+
 const throttle = (callback, delay) => {
   let shouldWait = false;
   return (...args) => {
@@ -380,13 +382,19 @@ const UI = {
     if (state.startGameTime && state.startGameTime + 60000 < Date.now()) {
       state.currentGameStep = state.finalScreenGameStep
 
+      clearInterval(interval)
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const id = searchParams.get("UUID");
+      if (id) {
+        dbFunctions.set(dbFunctions.ref(db, id), {
+          result: JSON.stringify(state),
+        })
+      }
+
       setTimeout(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        for (key in state) {
-          searchParams.append(key, state[key]);
-        }
-        window.location.href = `./final.html?${searchParams.toString()}`;
-      }, 1500)
+        document.getElementsByClassName('final')[0].style.display = 'block'
+      }, 500)
     }
 
     if (state.currentGameStep === state.playGameStep) return;
@@ -423,7 +431,7 @@ const runGame = () => {
   UI.tap[0].sprite.src = "img/tap1.png";
   UI.tap[1].sprite.src = "img/tap2.png";
 
-  setInterval(gameLoop, 20);
+  interval = setInterval(gameLoop, 20);
 };
 
 runGame();
