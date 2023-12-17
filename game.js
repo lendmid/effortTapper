@@ -227,7 +227,7 @@ const tax = {
     for (let i = 0; i < this.taxes.length; i++) {
       const tax = this.taxes[i];
 
-      sctx.fillStyle = "#E9AAAA";
+      sctx.fillStyle = "rgba(233, 170, 170, 0.3)";
       const taxWidth = sceneWidth - tax.x;
       const taxHeight = getYByScorePerSecond(0) - getYByScorePerSecond(tax.taxRate);
       sctx.fillRect(tax.x, tax.y, taxWidth, taxHeight);
