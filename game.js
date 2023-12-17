@@ -400,6 +400,7 @@ function draw() {
   sctx.fillRect(0, 0, scrn.width, scrn.height);
   tax.draw();
   drawDashedLine(floorHeight, sceneX);
+  drawDashedLine(siblingHeight, sceneX);
 
   point.draw();
   UI.draw();
