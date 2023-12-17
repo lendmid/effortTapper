@@ -9,8 +9,20 @@
     <title>EffortTapper</title>
 </head>
 
-<body>
-    <canvas id="canvas" width="1000" height="700"></canvas>
+<body>    
+    <main class="finalScreen notVisible" id="finalScreen">
+        <div>
+            <h1>Thank you for participation</h1>
+        </div>
+        <hr>
+
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdw1E4olPD3VAj8J4jR59ezXVVZfSyciFtgYy829TX2Ez3KAg/viewform?embedded=true"
+            frameborder="0" marginheight="0" marginwidth="0">
+            Loading…
+        </iframe>
+    </main>
+
+    <canvas id="canvas" class="visible" width="1000" height="700"></canvas>
 
     <script src="game.js"></script>
 </body>

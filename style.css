@@ -34,8 +34,20 @@ hr {
     width: 100%;
 }
 
-.final {
+.finalScreen {
     width: 1000px;
+}
+
+.notVisible {
+    overflow: hidden;
+    height: 0;
+    opacity: 0;
+    transition: height 0ms 800ms, opacity 800ms 0ms;
+}
+
+.visible {
+    height: auto; opacity: 1;
+    transition: height 0ms 0ms, opacity 800ms 0ms;
 }
 
 /* global */

@@ -220,13 +220,10 @@ scrn.addEventListener("click", () => {
 });
 
 const tax = {
-  // gap: 85,
   moving: true,
   taxes: [],
   draw: function () {
-    for (let i = 0; i < this.taxes.length; i++) {
-      const tax = this.taxes[i];
-
+    for (let tax of this.taxes) {
       sctx.fillStyle = "rgba(233, 170, 170, 0.3)";
       const taxWidth = sceneWidth - tax.x;
       const taxHeight = getYByScorePerSecond(0) - getYByScorePerSecond(tax.taxRate);
@@ -236,6 +233,7 @@ const tax = {
         sctx.fillText(`${tax.taxRate} ¢`, 940, tax.y + 30);
       }
     }
+
     if (state.currentGameStep != state.playGameStep) return;
 
     if (frames > 200 == 0 && this.taxes.length === 0) {
@@ -245,9 +243,7 @@ const tax = {
         taxRate: 30
       });
     }
-    this.taxes.forEach((taxe) => {
-      taxe.x -= dx;
-    });
+    this.taxes.forEach((taxe) => taxe.x -= dx);
   },
 };
 
@@ -330,7 +326,6 @@ const point = {
     setLeftTimerValue()
     setTaxPerSecond(tax.taxes[0].taxRate)
     if (!state.startGameTime) state.startGameTime = Date.now();
-    console.log("state: ", state)
   }
 };
 
@@ -377,16 +372,22 @@ const UI = {
     drawTimer();
   },
   update: function () {
-    if (state.startGameTime && state.startGameTime + 60000 < Date.now()) {
+    if (state.currentGameStep === state.finalScreenGameStep) return
+    if (state.startGameTime && state.startGameTime + 1000 < Date.now()) {
       state.currentGameStep = state.finalScreenGameStep
 
       setTimeout(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        for (key in state) {
-          searchParams.append(key, state[key]);
-        }
-        window.location.href = `./final.html?${searchParams.toString()}`;
-      }, 1500)
+        const gameScreen = document.getElementById("canvas")
+        const finalScreen = document.getElementById("finalScreen")
+        gameScreen.classList.add("visible");
+        gameScreen.classList.remove("notVisible");
+        finalScreen.classList.add("visible");
+        finalScreen.classList.remove("notVisible");
+
+        console.group("Game results");
+        console.table(state);
+        console.groupEnd("Game results");
+      }, 2000)
     }
 
     if (state.currentGameStep === state.playGameStep) return;
@@ -416,6 +417,7 @@ function gameLoop() {
   draw();
   update();
   frames++;
+  if (state.currentGameStep !== state.finalScreenGameStep) console.log("state: ", state)
 }
 
 const runGame = () => {
