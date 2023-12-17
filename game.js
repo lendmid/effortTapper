@@ -120,7 +120,7 @@ const setLeftTimerValue = throttle(
 const drawProducedScore = () => {
   setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillText(state.scoreProduced + "$", scrn.width - 150, 40);
+  sctx.fillText(state.scoreProduced + "¢", scrn.width - 150, 40);
   sctx.textAlign = "left";
   sctx.fillStyle = colors.textGray;
   sctx.fillText("produced", scrn.width - 140, 40);
@@ -128,7 +128,7 @@ const drawProducedScore = () => {
 const drawTaxed = () => {
   setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillText(state.scoreTaxed + "$", scrn.width - 150, 70);
+  sctx.fillText(state.scoreTaxed + "¢", scrn.width - 150, 70);
   sctx.fillStyle = colors.textGray;
   sctx.textAlign = "left";
   sctx.fillText("taxed", scrn.width - 140, 70);
@@ -137,7 +137,7 @@ const drawTaxed = () => {
 const drawProfitScore = () => {
   setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillText(state.scoreProduced + state.scoreTaxed + "$", 500, 40);
+  sctx.fillText(state.scoreProduced + state.scoreTaxed + "¢", 500, 40);
   sctx.textAlign = "left";
   sctx.fillStyle = colors.textGray;
   sctx.fillText("profit", 510, 40);
@@ -145,7 +145,7 @@ const drawProfitScore = () => {
 const drawProfitPerSecond = () => {
   setTextStyles(false);
   sctx.textAlign = "right";
-  sctx.fillText(state.scorePerSecond - state.taxPerSecond + "$", 500, 70);
+  sctx.fillText(state.scorePerSecond - state.taxPerSecond + "¢", 500, 70);
   sctx.textAlign = "left";
   sctx.fillStyle = colors.textGray;
   sctx.fillText("profit /s", 510, 70);
@@ -233,7 +233,7 @@ const tax = {
       sctx.fillRect(tax.x, tax.y, taxWidth, taxHeight);
       if (tax.x < 900) {
         sctx.fillStyle = "red";
-        sctx.fillText(`${tax.taxRate} $`, 940, tax.y + 30);
+        sctx.fillText(`${tax.taxRate} ¢`, 940, tax.y + 30);
       }
     }
     if (state.currentGameStep != state.playGameStep) return;
