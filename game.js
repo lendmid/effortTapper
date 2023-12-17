@@ -17,6 +17,7 @@ const minSceneHeight = floorHeight - pointRadius; // 565
 const minSceneMaxHeight = minSceneHeight - maxSceneHeght; // 440
 
 const dx = 2;
+const gameLength = 60_000;
 
 const throttle = (callback, delay) => {
   let shouldWait = false;
@@ -373,7 +374,7 @@ const UI = {
   },
   update: function () {
     if (state.currentGameStep === state.finalScreenGameStep) return
-    if (state.startGameTime && state.startGameTime + 1000 < Date.now()) {
+    if (state.startGameTime && state.startGameTime + gameLength < Date.now()) {
       state.currentGameStep = state.finalScreenGameStep
 
       setTimeout(() => {
